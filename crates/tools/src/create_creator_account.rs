@@ -5,7 +5,7 @@ use gw_common::builtins::RESERVED_ACCOUNT_ID;
 use gw_config::{BackendType, Config};
 use gw_types::{
     core::ScriptHashType,
-    packed::{CreateAccount, L2Transaction, MetaContractArgs, RawL2Transaction, Script},
+    packed::{CreateAccount, Fee, L2Transaction, MetaContractArgs, RawL2Transaction, Script},
 };
 use std::path::Path;
 
@@ -168,7 +168,12 @@ pub fn create_creator_account(
 
     let create_account = CreateAccount::new_builder()
         .script(l2_script)
-        .fee(fee.pack())
+        .fee(
+            Fee::new_builder()
+                .amount(fee.pack())
+                .registry_id(eth_registry_id.pack())
+                .build(),
+        )
         .build();
 
     let l2tx_args = MetaContractArgs::new_builder().set(create_account).build();
