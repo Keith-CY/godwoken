@@ -4,7 +4,6 @@ use crate::types::ScriptsDeploymentResult;
 use anyhow::{anyhow, Result};
 use ckb_crypto::secp::Privkey;
 use ckb_fixed_hash::H256;
-use ckb_jsonrpc_types::JsonBytes;
 use ckb_sdk::SECP256K1;
 use ckb_types::{
     bytes::Bytes as CKBBytes, core::ScriptHashType, prelude::Builder as CKBBuilder,
@@ -81,50 +80,11 @@ pub fn privkey_to_l2_script_hash(
     Ok(script_hash)
 }
 
-pub fn l2_script_hash_to_short_script_hash(script_hash: &H256) -> GwBytes {
-    let short_script_hash = &script_hash.as_bytes()[..20];
-
-    GwBytes::from(short_script_hash.to_vec())
-}
-
-pub fn privkey_to_short_script_hash(
-    privkey: &H256,
-    rollup_type_hash: &H256,
-    scripts_deployment: &ScriptsDeploymentResult,
-) -> Result<GwBytes> {
-    let script_hash = privkey_to_l2_script_hash(privkey, rollup_type_hash, scripts_deployment)?;
-
-    let short_script_hash = l2_script_hash_to_short_script_hash(&script_hash);
-    Ok(short_script_hash)
-}
-
-pub fn short_script_hash_to_account_id(
-    godwoken_rpc_client: &mut GodwokenRpcClient,
-    short_script_hash: &GwBytes,
-) -> Result<Option<u32>> {
-    let bytes = JsonBytes::from_bytes(short_script_hash.clone());
-    let script_hash = match godwoken_rpc_client.get_script_hash_by_short_script_hash(bytes)? {
-        Some(h) => h,
-        None => {
-            return Err(anyhow!(
-                "script hash by short script hash: 0x{} not found",
-                hex::encode(short_script_hash.to_vec()),
-            ))
-        }
-    };
-    let account_id = godwoken_rpc_client.get_account_id_by_script_hash(script_hash)?;
-
-    Ok(account_id)
-}
-
-// address: 0x... / id: 1
-pub fn parse_account_short_script_hash(
-    godwoken: &mut GodwokenRpcClient,
-    account: &str,
-) -> Result<GwBytes> {
-    // if match short script hash
-    if account.starts_with("0x") && account.len() == 42 {
-        let r = GwBytes::from(hex::decode(account[2..].as_bytes())?);
+/// return script hash of an account
+pub fn parse_account_from_str(godwoken: &mut GodwokenRpcClient, account: &str) -> Result<H256> {
+    // if match script hash
+    if account.starts_with("0x") && account.len() == 64 {
+        let r = H256::from_slice(account[2..].as_bytes())?;
         return Ok(r);
     }
 
@@ -134,8 +94,7 @@ pub fn parse_account_short_script_hash(
         Err(_) => return Err(anyhow!("account id parse error!")),
     };
     let script_hash = godwoken.get_script_hash(account_id)?;
-    let short_script_hash = GwBytes::from((&script_hash.as_bytes()[..20]).to_vec());
-    Ok(short_script_hash)
+    Ok(script_hash)
 }
 
 pub fn read_privkey(privkey_path: &Path) -> Result<H256> {
