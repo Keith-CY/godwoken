@@ -32,6 +32,7 @@ pub struct GenerateNodeConfigArgs<'a> {
     pub user_rollup_config: &'a UserRollupConfig,
     pub omni_lock_config: &'a OmniLockConfig,
     pub node_mode: NodeMode,
+    pub block_producer_addr: Option<&'a str>,
 }
 
 pub async fn generate_node_config(args: GenerateNodeConfigArgs<'_>) -> Result<Config> {
@@ -47,6 +48,7 @@ pub async fn generate_node_config(args: GenerateNodeConfigArgs<'_>) -> Result<Co
         user_rollup_config,
         omni_lock_config,
         node_mode,
+        block_producer_addr,
     } = args;
 
     let mut rpc_client = HttpRpcClient::new(ckb_url.to_string());
@@ -203,8 +205,14 @@ pub async fn generate_node_config(args: GenerateNodeConfigArgs<'_>) -> Result<Co
     let consensus = ConsensusConfig {
         contract_type_scripts,
     };
+    let address = ckb_jsonrpc_types::JsonBytes::from_bytes(
+        block_producer_addr.unwrap_or_default().to_owned().into(),
+    );
     let block_producer: Option<BlockProducerConfig> = Some(BlockProducerConfig {
-        block_producer: RegistryAddressConfig::default(),
+        block_producer: RegistryAddressConfig {
+            registry_id: gw_common::builtins::ETH_REGISTRY_ACCOUNT_ID,
+            address,
+        },
         // cell deps
         rollup_config_cell_dep,
         challenger_config,

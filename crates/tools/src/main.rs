@@ -218,6 +218,12 @@ async fn run_cli() -> Result<()> {
                         .default_value("localhost:8119")
                         .required(true)
                         .help("The URL of rpc server"),
+                ).arg(
+                    Arg::with_name("block-producer-address")
+                        .long("block-producer-address")
+                        .takes_value(true)
+                        .required(false)
+                        .help("The eth_address of the block-producer")
                 ),
         )
         .subcommand(
@@ -919,6 +925,7 @@ async fn run_cli() -> Result<()> {
                 Path::new(m.value_of("scripts-deployment-config-path").unwrap());
             let server_url = m.value_of("rpc-server-url").unwrap().to_string();
             let omni_lock_config_path = Path::new(m.value_of("omni-lock-config-path").unwrap());
+            let block_producer_addr = m.value_of("block-producer-address");
 
             let rollup_result: RollupDeploymentResult = {
                 let content = std::fs::read(genesis_path)?;
@@ -954,6 +961,7 @@ async fn run_cli() -> Result<()> {
                 user_rollup_config: &user_rollup_config,
                 omni_lock_config: &omni_lock_config,
                 node_mode: gw_config::NodeMode::ReadOnly,
+                block_producer_addr,
             };
 
             match generate_config::generate_node_config(args).await {
