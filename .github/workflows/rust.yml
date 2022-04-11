@@ -34,7 +34,7 @@ jobs:
   integration-test:
     uses: nervosnetwork/godwoken-tests/.github/workflows/reusable-integration-test-v1.yml@develop
     with:
-      # github.sha: The commit SHA that triggered the workflow run.
-      godwoken_ref: ${{ github.sha }}
+      # github.ref: The branch or tag ref that triggered the workflow run. For branches this is the format refs/heads/<branch_name>, and for tags it is refs/tags/<tag_name>.
+      godwoken_ref: ${{ github.ref }}
       kicker_ref: v1.1
       tests_ref: develop
