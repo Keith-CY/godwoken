@@ -1922,18 +1922,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "gw-eoa-mapping"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "gw-common",
- "gw-traits",
- "gw-types",
- "gw-utils",
- "sha3",
-]
-
-[[package]]
 name = "gw-generator"
 version = "0.2.0"
 dependencies = [
@@ -2161,7 +2149,7 @@ dependencies = [
 
 [[package]]
 name = "gw-tests"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "async-jsonrpc-client",
@@ -2185,7 +2173,6 @@ dependencies = [
  "gw-config",
  "gw-db",
  "gw-dynamic-config",
- "gw-eoa-mapping",
  "gw-generator",
  "gw-mem-pool",
  "gw-rpc-client",
